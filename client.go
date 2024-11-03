@@ -2,6 +2,8 @@ package main
 
 import (
 	"bufio"
+	"bytes"
+	"fmt"
 	"io"
 	"net"
 )
@@ -26,5 +28,35 @@ func (c *client) read() error {
 		}
 
 		c.handle(msg)
+	}
+}
+
+func (c *client) handle(message []byte) {
+	cmd := bytes.ToUpper(bytes.TrimSpace(bytes.Split(message, []byte(" "))[0]))
+	args := bytes.TrimSpace(bytes.TrimPrefix(message, cmd))
+
+	switch string(cmd) {
+	case "REG":
+		if err := c.reg(args); err != nil {
+			c.err(err)
+		}
+	case "JOIN":
+		if err := c.join(args); err != nil {
+			c.err(err)
+		}
+	case "LEAVE":
+		if err := c.leave(args); err != nil {
+			c.err(err)
+		}
+	case "MSG":
+		if err := c.msg(args); err != nil {
+			c.err(err)
+		}
+	case "CHNS":
+		c.chns()
+	case "USRS":
+		c.usrs()
+	default:
+		c.err(fmt.Errorf("unknown command %s", cmd))
 	}
 }
