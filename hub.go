@@ -52,3 +52,14 @@ func (h *hub) deregister(c *client) {
 		}
 	}
 }
+
+func (h *hub) joinChannel(u string, c string) {
+	if client, ok := h.clients[u]; ok {
+		if channel, ok := h.channels[c]; ok {
+			channel.clients[client] = true
+		} else {
+			h.channels[c] = newChannel(c)
+			h.channels[c].clients[client] = true
+		}
+	}
+}
