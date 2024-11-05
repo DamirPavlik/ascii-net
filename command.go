@@ -8,3 +8,12 @@ type command struct {
 	sender    string
 	body      []byte
 }
+
+const (
+	REG ID = iota
+	JOIN
+	LEAVE
+	MSG
+	CHNS
+	USRS
+)
