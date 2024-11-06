@@ -63,7 +63,7 @@ func (c *client) handle(message []byte) {
 
 func (c *client) reg(args []byte) error {
 	u := bytes.TrimSpace(args)
-	if u[0] != "@" {
+	if u[0] != '@' {
 		return fmt.Errorf("skill issues, username must begin with @")
 	}
 
@@ -71,7 +71,8 @@ func (c *client) reg(args []byte) error {
 		return fmt.Errorf("skill issues, username can not be blank")
 	}
 
-	c.username = string(u) c.register <- c
+	c.username = string(u)
+	c.register <- c
 
 	return nil
 }
