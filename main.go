@@ -10,4 +10,7 @@ func main() {
 	if err != nil {
 		log.Printf("err %v", err)
 	}
+
+	hub := newHub()
+	go hub.run()
 }
