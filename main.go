@@ -13,4 +13,19 @@ func main() {
 
 	hub := newHub()
 	go hub.run()
+
+	for {
+		conn, err := ln.Accept()
+		if err != nil {
+			log.Printf("%v", err)
+		}
+
+		c := newClient(
+			conn,
+			hub.commands,
+			hub.registrations,
+			hub.deregistrations,
+		)
+		go c.read()
+	}
 }
