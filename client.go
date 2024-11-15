@@ -91,6 +91,21 @@ func (c *client) reg(args []byte) error {
 	return nil
 }
 
+func (c *client) join(args []byte) error {
+	channelId := bytes.TrimSpace(args)
+	if channelId[0] != '#' {
+		return fmt.Errorf("ERR channel id must begin with #")
+	}
+
+	c.outbound <- command{
+		recipient: string(channelId),
+		sender:    c.username,
+		id:        JOIN,
+	}
+
+	return nil
+}
+
 func (c *client) err(e error) {
 	c.conn.Write([]byte("ERR " + e.Error() + "\n"))
 }
