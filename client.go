@@ -8,12 +8,25 @@ import (
 	"net"
 )
 
+var (
+	DELIMITER = []byte(`\r\n`)
+)
+
 type client struct {
 	conn       net.Conn
 	outbound   chan<- command
 	register   chan<- *client
 	deregister chan<- *client
 	username   string
+}
+
+func newClient(conn net.Conn, o chan<- command, r chan<- *client, d chan<- *client) *client {
+	return &client{
+		conn:       conn,
+		outbound:   o,
+		register:   r,
+		deregister: d,
+	}
 }
 
 func (c *client) read() error {
