@@ -106,6 +106,13 @@ func (c *client) join(args []byte) error {
 	return nil
 }
 
+func (c *client) chns() {
+	c.outbound <- command{
+		sender: c.username,
+		id:     CHNS,
+	}
+}
+
 func (c *client) usrs() {
 	c.outbound <- command{
 		sender: c.username,
