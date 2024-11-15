@@ -106,6 +106,13 @@ func (c *client) join(args []byte) error {
 	return nil
 }
 
+func (c *client) usrs() {
+	c.outbound <- command{
+		sender: c.username,
+		id:     USRS,
+	}
+}
+
 func (c *client) err(e error) {
 	c.conn.Write([]byte("ERR " + e.Error() + "\n"))
 }
