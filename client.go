@@ -106,6 +106,21 @@ func (c *client) join(args []byte) error {
 	return nil
 }
 
+func (c *client) leave(args []byte) error {
+	channelId := bytes.TrimSpace(args)
+	if channelId[0] != '#' {
+		return fmt.Errorf("ERR channel id must begin with #")
+	}
+
+	c.outbound <- command{
+		recipient: string(channelId),
+		sender:    c.username,
+		id:        LEAVE,
+	}
+
+	return nil
+}
+
 func (c *client) chns() {
 	c.outbound <- command{
 		sender: c.username,
