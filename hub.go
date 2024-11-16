@@ -1,11 +1,23 @@
 package main
 
+import "strings"
+
 type hub struct {
 	channels        map[string]*channel
 	clients         map[string]*client
 	commands        chan command
 	deregistrations chan *client
 	registrations   chan *client
+}
+
+func newHub() *hub {
+	return &hub{
+		registrations:   make(chan *client),
+		deregistrations: make(chan *client),
+		clients:         make(map[string]*client),
+		channels:        make(map[string]*channel),
+		commands:        make(chan command),
+	}
 }
 
 func (h *hub) run() {
@@ -58,9 +70,48 @@ func (h *hub) joinChannel(u string, c string) {
 		if channel, ok := h.channels[c]; ok {
 			channel.clients[client] = true
 		} else {
-			h.channels[c] = newChannel(c)
-			h.channels[c].clients[client] = true
+			ch := newChannel(c)
+			ch.clients[client] = true
+			h.channels[c] = ch
 		}
+		client.conn.Write([]byte("OK\n"))
+	}
+}
+
+func (h *hub) leaveChannel(u string, c string) {
+	if client, ok := h.clients[u]; ok {
+		if channel, ok := h.channels[c]; ok {
+			delete(channel.clients, client)
+		}
+	}
+}
+
+func (h *hub) listChannels(u string) {
+	if client, ok := h.clients[u]; ok {
+		var names []string
+
+		if len(h.channels) == 0 {
+			client.conn.Write([]byte("ERR no channels found\n"))
+		}
+
+		for c := range h.channels {
+			names = append(names, "#"+c+" ")
+		}
+
+		resp := strings.Join(names, ", ")
+		client.conn.Write([]byte(resp + "\n"))
+	}
+}
+
+func (h *hub) listUsers(u string) {
+	if client, ok := h.clients[u]; ok {
+		var names []string
+		for c, _ := range h.clients {
+			names = append(names, "@"+c+" ")
+		}
+
+		resp := strings.Join(names, ", ")
+		client.conn.Write([]byte(resp + "\n"))
 	}
 }
 
@@ -72,12 +123,20 @@ func (h *hub) message(u string, r string, m []byte) {
 				if _, ok := channel.clients[sender]; ok {
 					channel.broadcast(sender.username, m)
 				}
+			} else {
+				sender.conn.Write([]byte("ERR no such channel"))
 			}
+
 		case '@':
 			if user, ok := h.clients[r]; ok {
-				user.conn.Write(append(m, '\n'))
+				msg := append([]byte(sender.username+": "), m...)
+				msg = append(msg, '\n')
+				user.conn.Write(msg)
+			} else {
+				sender.conn.Write([]byte("ERR no such user"))
 			}
+		default:
+			sender.conn.Write([]byte("ERR msg command"))
 		}
-
 	}
 }
