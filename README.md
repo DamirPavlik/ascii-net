@@ -1,4 +1,4 @@
-# Custom Protocol Built on TCP/IP
+# ASCII NET — Custom Protocol Built on TCP/IP
 
 Welcome to the repository for my custom protocol, built on top of TCP/IP. This protocol provides a simple command-based system for real-time communication between clients and servers. It supports basic operations like registering users, joining channels, messaging, and listing users or channels.
 
